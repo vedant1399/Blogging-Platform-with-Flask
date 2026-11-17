@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- User Profile Header -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+            <div class="w-16 h-16 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-2xl">
+                {{ user.username[0]|upper }}
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">{{ user.username }}</h1>
+                <p class="text-xs text-slate-500">{{ user.email }} • Member since {{ user.created_at.strftime('%B %Y') if user.created_at else 'Recent' }}</p>
+            </div>
+        </div>
+        <div class="text-right">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                ● Authenticated Session
+            </span>
+            <div class="text-xs text-slate-400 mt-1">Flask-Login Active</div>
+        </div>
+    </div>
+
+    <!-- User's Authored Posts -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h2 class="text-lg font-bold text-slate-900 mb-4">Your Published Posts ({{ posts|length }})</h2>
+        <div class="space-y-4">
+            {% if posts %}
+                {% for post in posts %}
+                    <div class="border border-slate-100 bg-slate-50/50 p-4 rounded-lg">
+                        <h3 class="font-bold text-slate-800 text-base">{{ post.title }}</h3>
+                        <p class="text-sm text-slate-600 mt-1">{{ post.content }}</p>
+                        <div class="text-[10px] text-slate-400 mt-2">
+                            Published: {{ post.created_at.strftime('%Y-%m-%d %H:%M UTC') if post.created_at else '' }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-xs text-slate-400 italic">You haven't published any posts yet. Head over to the home page to publish one!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

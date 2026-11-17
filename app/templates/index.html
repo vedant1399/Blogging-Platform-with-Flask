@@ -8,190 +8,168 @@
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
         <div class="flex items-center space-x-3 mb-2">
             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-                ● Status: Active & Configured
+                ● Status: Active & Secured
             </span>
             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
-                Week 1 Completed
+                Week 2 Completed
             </span>
         </div>
-        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Flask Setup, Blueprints & Database Architecture</h1>
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Flask User Authentication & Session Management</h1>
         <p class="mt-2 text-slate-600 max-w-3xl">
-            This project is the foundational architecture for the <strong>Blogging Platform with Flask</strong> internship project.
-            Built with the Application Factory pattern, modular Blueprints, SQLAlchemy ORM with User and Post models, and database migrations via Flask-Migrate.
+            This project fulfills all requirements for <strong>Week 2: User Authentication</strong>.
+            Featuring secure user registration, password hashing (Werkzeug), session management (Flask-Login), login/logout workflows, and protected routes.
         </p>
     </div>
 
     <!-- Requirements Checklist Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition">
-            <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg mb-4">1</div>
-            <h3 class="font-bold text-slate-900 mb-1">Flask Environment</h3>
-            <p class="text-sm text-slate-500 mb-3">Structured configuration classes, environment variable isolation, and clean entrypoints.</p>
-            <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">✓ Configured</span>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+            <h4 class="font-bold text-slate-900 text-sm mb-1">User Registration</h4>
+            <p class="text-xs text-slate-500 mb-2">Registration with unique username & email checks plus password confirmation.</p>
+            <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">✓ Implemented</span>
         </div>
 
-        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition">
-            <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg mb-4">2</div>
-            <h3 class="font-bold text-slate-900 mb-1">Modular Blueprints</h3>
-            <p class="text-sm text-slate-500 mb-3">Modular separation of concerns with <code class="text-indigo-600 font-mono text-xs">main</code> (HTML views) and <code class="text-indigo-600 font-mono text-xs">api</code> (REST endpoints).</p>
-            <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">✓ Blueprints Active</span>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+            <h4 class="font-bold text-slate-900 text-sm mb-1">Secure Password Hashing</h4>
+            <p class="text-xs text-slate-500 mb-2">One-way salt-hashed passwords stored safely using Werkzeug security functions.</p>
+            <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">✓ PBKDF2/SHA256</span>
         </div>
 
-        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition">
-            <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg mb-4">3</div>
-            <h3 class="font-bold text-slate-900 mb-1">SQLAlchemy & Flask-Migrate</h3>
-            <p class="text-sm text-slate-500 mb-3">Relational models (User & Post) with Alembic migration version control tracking schema state.</p>
-            <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">✓ Database & Migrations</span>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+            <h4 class="font-bold text-slate-900 text-sm mb-1">Flask-Login Sessions</h4>
+            <p class="text-xs text-slate-500 mb-2">Session management with <code class="text-indigo-600 font-mono text-[10px]">UserMixin</code>, <code class="text-indigo-600 font-mono text-[10px]">user_loader</code>, and cookie sessions.</p>
+            <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">✓ Active</span>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+            <h4 class="font-bold text-slate-900 text-sm mb-1">Protected Routes</h4>
+            <p class="text-xs text-slate-500 mb-2">Guarded by <code class="text-indigo-600 font-mono text-[10px]">@login_required</code> decorator with automatic login redirection.</p>
+            <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">✓ Protected</span>
         </div>
     </div>
 
-    <!-- Live Data / Test Forms Section -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Add Author / User Card -->
-        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center space-x-2">
-                <span>👤 Add Author / User</span>
-            </h2>
-            <form id="addUserForm" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Username</label>
-                    <input type="text" id="username" required placeholder="e.g. vedant" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    <!-- Interactive Section: Post Creation & Authentication State -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Left: Auth & Post Creation Box -->
+        <div class="md:col-span-1 space-y-6">
+            {% if current_user.is_authenticated %}
+                <!-- Authenticated User Card -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">
+                            {{ current_user.username[0]|upper }}
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-900 text-sm">Logged in as {{ current_user.username }}</div>
+                            <div class="text-[11px] text-slate-500">{{ current_user.email }}</div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <a href="{{ url_for('auth.profile') }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg flex-1 text-center">
+                            View Profile
+                        </a>
+                        <a href="{{ url_for('auth.logout') }}" class="text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 px-3 py-1.5 rounded-lg flex-1 text-center">
+                            Logout
+                        </a>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Email</label>
-                    <input type="email" id="email" required placeholder="e.g. vedant@example.com" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition">
-                    Save User to Database
-                </button>
-            </form>
-            <div id="userFeedback" class="mt-3 text-xs"></div>
 
-            <div class="mt-6 border-t border-slate-100 pt-4">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Registered Authors</h4>
-                <div id="usersList" class="space-y-2 max-h-48 overflow-y-auto">
+                <!-- Create Post Card (Requires Auth) -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-900 text-base mb-3 flex items-center space-x-2">
+                        <span>📝 Create New Post</span>
+                    </h3>
+                    <form action="{{ url_for('main.create_post_form') }}" method="POST" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Post Title</label>
+                            <input type="text" name="title" required placeholder="e.g. My Experience with Flask-Login" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Content</label>
+                            <textarea name="content" rows="3" required placeholder="Write your post content..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition">
+                            Publish as {{ current_user.username }}
+                        </button>
+                    </form>
+                </div>
+            {% else %}
+                <!-- Unauthenticated Sign In Prompt -->
+                <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-100 text-center space-y-4">
+                    <div class="w-12 h-12 bg-white text-indigo-600 rounded-full flex items-center justify-center mx-auto font-bold text-xl shadow-sm">
+                        🔒
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base">Authentication Required</h3>
+                        <p class="text-xs text-slate-600 mt-1">Sign in with Flask-Login to publish posts and access your profile.</p>
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <a href="{{ url_for('auth.login') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2 px-4 rounded-lg transition shadow-sm">
+                            Sign In
+                        </a>
+                        <a href="{{ url_for('auth.register') }}" class="bg-white hover:bg-slate-50 text-indigo-600 text-xs font-semibold py-2 px-4 rounded-lg border border-indigo-200 transition">
+                            Register an Account
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Registered Authors List -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Registered Users</h4>
+                <div class="space-y-2 max-h-48 overflow-y-auto">
                     {% if users %}
-                        {% for user in users %}
+                        {% for u in users %}
                             <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg text-xs">
-                                <span class="font-medium text-slate-800">{{ user.username }} ({{ user.email }})</span>
-                                <span class="text-slate-400">ID: {{ user.id }} • {{ user.posts.count() }} posts</span>
+                                <div>
+                                    <span class="font-medium text-slate-800">{{ u.username }}</span>
+                                    <span class="text-[10px] text-slate-400 block">{{ u.email }}</span>
+                                </div>
+                                <span class="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded font-medium">
+                                    {{ u.posts.count() }} posts
+                                </span>
                             </div>
                         {% endfor %}
                     {% else %}
-                        <p class="text-xs text-slate-400 italic">No users created yet. Use the form above to add an author!</p>
+                        <p class="text-xs text-slate-400 italic">No users yet.</p>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Create Blog Post Card -->
-        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center space-x-2">
-                <span>📝 Publish Blog Post</span>
-            </h2>
-            <form id="addPostForm" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Author User ID</label>
-                    <input type="number" id="postUserId" required placeholder="e.g. 1" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Post Title</label>
-                    <input type="text" id="postTitle" required placeholder="e.g. Getting Started with Flask & SQLAlchemy" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Content</label>
-                    <textarea id="postContent" rows="3" required placeholder="Write your blog post content here..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
-                </div>
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition">
-                    Publish Post
-                </button>
-            </form>
-            <div id="postFeedback" class="mt-3 text-xs"></div>
-        </div>
-    </div>
-
-    <!-- Recent Blog Posts Feed -->
-    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 class="text-lg font-bold text-slate-900 mb-4">Latest Blog Posts from Database</h3>
-        <div class="space-y-4">
-            {% if posts %}
-                {% for post in posts %}
-                    <div class="border border-slate-100 bg-slate-50/50 p-4 rounded-lg">
-                        <div class="flex justify-between items-start">
-                            <h4 class="font-bold text-slate-800 text-base">{{ post.title }}</h4>
-                            <span class="text-xs text-slate-400">By {{ post.author.username if post.author else 'User #' ~ post.user_id }}</span>
+        <!-- Right: Latest Blog Posts Feed -->
+        <div class="md:col-span-2">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center justify-between">
+                    <span>Recent Blog Posts</span>
+                    <span class="text-xs font-normal text-slate-400">{{ posts|length }} published</span>
+                </h3>
+                <div class="space-y-4">
+                    {% if posts %}
+                        {% for post in posts %}
+                            <div class="border border-slate-100 bg-slate-50/50 p-5 rounded-xl hover:border-indigo-100 transition">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="font-bold text-slate-800 text-base">{{ post.title }}</h4>
+                                    <span class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                                        {{ post.author.username if post.author else 'User #' ~ post.user_id }}
+                                    </span>
+                                </div>
+                                <p class="text-sm text-slate-600 mt-2 leading-relaxed">{{ post.content }}</p>
+                                <div class="text-[11px] text-slate-400 mt-3 pt-2 border-t border-slate-100 flex justify-between items-center">
+                                    <span>Published: {{ post.created_at.strftime('%B %d, %Y at %H:%M UTC') if post.created_at else '' }}</span>
+                                    <span class="text-slate-300">ID #{{ post.id }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-10">
+                            <p class="text-sm text-slate-500 italic">No blog posts published yet.</p>
+                            <p class="text-xs text-slate-400 mt-1">Sign in and publish your first post!</p>
                         </div>
-                        <p class="text-sm text-slate-600 mt-2">{{ post.content }}</p>
-                        <div class="text-[10px] text-slate-400 mt-2">
-                            Published: {{ post.created_at.strftime('%Y-%m-%d %H:%M UTC') if post.created_at else '' }}
-                        </div>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p class="text-xs text-slate-400 italic">No posts published yet. Create an author and publish the first post above!</p>
-            {% endif %}
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    // Handle Add User Form Submission
-    document.getElementById('addUserForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('username').value;
-        const email = document.getElementById('email').value;
-        const feedback = document.getElementById('userFeedback');
-
-        try {
-            const res = await fetch('/api/users', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email })
-            });
-            const data = await res.json();
-            if (res.ok) {
-                feedback.className = 'mt-3 text-xs text-emerald-600 font-semibold';
-                feedback.textContent = `Author "${data.username}" created with ID ${data.id}!`;
-                setTimeout(() => window.location.reload(), 800);
-            } else {
-                feedback.className = 'mt-3 text-xs text-rose-600 font-semibold';
-                feedback.textContent = data.error || 'Failed to create user.';
-            }
-        } catch (err) {
-            feedback.className = 'mt-3 text-xs text-rose-600 font-semibold';
-            feedback.textContent = 'Network error.';
-        }
-    });
-
-    // Handle Publish Blog Post Form Submission
-    document.getElementById('addPostForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const user_id = document.getElementById('postUserId').value;
-        const title = document.getElementById('postTitle').value;
-        const content = document.getElementById('postContent').value;
-        const feedback = document.getElementById('postFeedback');
-
-        try {
-            const res = await fetch('/api/posts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: parseInt(user_id), title, content })
-            });
-            const data = await res.json();
-            if (res.ok) {
-                feedback.className = 'mt-3 text-xs text-emerald-600 font-semibold';
-                feedback.textContent = `Blog post "${data.title}" published successfully!`;
-                setTimeout(() => window.location.reload(), 800);
-            } else {
-                feedback.className = 'mt-3 text-xs text-rose-600 font-semibold';
-                feedback.textContent = data.error || 'Failed to publish post.';
-            }
-        } catch (err) {
-            feedback.className = 'mt-3 text-xs text-rose-600 font-semibold';
-            feedback.textContent = 'Network error.';
-        }
-    });
-</script>
 {% endblock %}

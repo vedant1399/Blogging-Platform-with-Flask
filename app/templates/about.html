@@ -1,54 +1,47 @@
 {% extends 'base.html' %}
 
-{% block title %}About Project - Architecture & Setup{% endblock %}
+{% block title %}About Architecture - Blogging Platform{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-slate-200 p-8 space-y-6">
-    <h1 class="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-3">Project Architecture & Implementation</h1>
+    <h1 class="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-3">Project Architecture & Authentication Design</h1>
     
     <div>
-        <h2 class="text-base font-semibold text-slate-800 mb-2">1. Application Factory Pattern</h2>
+        <h2 class="text-base font-semibold text-slate-800 mb-2">1. Application Factory & Modular Blueprints</h2>
         <p class="text-sm text-slate-600 leading-relaxed">
-            The project uses Flask's recommended Application Factory pattern via <code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">create_app()</code> in <code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">app/__init__.py</code>. This decouples application configuration and allows multiple instances to be tested or deployed across development, testing, and production environments.
-        </p>
-    </div>
-
-    <div>
-        <h2 class="text-base font-semibold text-slate-800 mb-2">2. Modular Blueprints</h2>
-        <p class="text-sm text-slate-600 leading-relaxed">
-            Routes and business logic are segregated into modular blueprints:
+            The project employs Flask's Application Factory pattern (<code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">create_app()</code>) with distinct Blueprints:
         </p>
         <ul class="list-disc list-inside text-sm text-slate-600 mt-2 space-y-1">
-            <li><strong class="font-mono text-xs text-indigo-600">main_bp</strong> (<code class="font-mono text-xs">/</code>, <code class="font-mono text-xs">/about</code>, <code class="font-mono text-xs">/health</code>): Handles front-end Jinja2 templated rendering.</li>
-            <li><strong class="font-mono text-xs text-indigo-600">api_bp</strong> (<code class="font-mono text-xs">/api/users</code>, <code class="font-mono text-xs">/api/tasks</code>): Provides RESTful JSON API endpoints for user and task entities.</li>
+            <li><strong class="font-mono text-xs text-indigo-600">auth_bp</strong> (<code class="font-mono text-xs">/auth/register</code>, <code class="font-mono text-xs">/auth/login</code>, <code class="font-mono text-xs">/auth/logout</code>, <code class="font-mono text-xs">/auth/profile</code>): User authentication and session lifecycle.</li>
+            <li><strong class="font-mono text-xs text-indigo-600">main_bp</strong> (<code class="font-mono text-xs">/</code>, <code class="font-mono text-xs">/about</code>, <code class="font-mono text-xs">/health</code>, <code class="font-mono text-xs">/create-post</code>): Core web views and post publishing.</li>
+            <li><strong class="font-mono text-xs text-indigo-600">api_bp</strong> (<code class="font-mono text-xs">/api/users</code>, <code class="font-mono text-xs">/api/posts</code>): RESTful JSON API endpoints.</li>
         </ul>
     </div>
 
     <div>
-        <h2 class="text-base font-semibold text-slate-800 mb-2">3. SQLAlchemy ORM & Flask-Migrate</h2>
+        <h2 class="text-base font-semibold text-slate-800 mb-2">2. Flask-Login & Session Management</h2>
         <p class="text-sm text-slate-600 leading-relaxed">
-            Database access is abstracted through Flask-SQLAlchemy with fully defined relational models (<code class="font-mono text-xs">User</code> and <code class="font-mono text-xs">Task</code>). Migrations are tracked and applied using Alembic through Flask-Migrate, allowing automated schema version control and zero-downtime upgrades.
+            User sessions are managed using <strong>Flask-Login</strong>:
+        </p>
+        <ul class="list-disc list-inside text-sm text-slate-600 mt-2 space-y-1">
+            <li><code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">UserMixin</code>: Implements standard Flask-Login properties (<code class="font-mono text-xs">is_authenticated</code>, <code class="font-mono text-xs">is_active</code>, <code class="font-mono text-xs">is_anonymous</code>, <code class="font-mono text-xs">get_id()</code>).</li>
+            <li><code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">@login_manager.user_loader</code>: Dynamically loads the active user from the session database ID.</li>
+            <li><code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">@login_required</code>: Protects sensitive views, automatically redirecting unauthorized visitors to <code class="font-mono text-xs">/auth/login?next=...</code> with flash alerts.</li>
+        </ul>
+    </div>
+
+    <div>
+        <h2 class="text-base font-semibold text-slate-800 mb-2">3. Password Security & Hashing</h2>
+        <p class="text-sm text-slate-600 leading-relaxed">
+            Passwords are never stored in plaintext. Passwords undergo cryptographic salted one-way hashing using Werkzeug's security suite (<code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">generate_password_hash</code> and <code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">check_password_hash</code>).
         </p>
     </div>
 
     <div>
-        <h2 class="text-base font-semibold text-slate-800 mb-2">4. Directory Layout</h2>
-        <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg text-xs font-mono overflow-x-auto">
-├── app/
-│   ├── __init__.py      # Application factory & Blueprint registration
-│   ├── extensions.py    # SQLAlchemy and Migrate instances
-│   ├── models.py        # Relational models (User, Task)
-│   ├── main/            # Main Blueprint (views)
-│   ├── api/             # API Blueprint (REST endpoints)
-│   ├── templates/       # HTML templates
-│   └── static/          # Static assets (CSS/JS)
-├── migrations/          # Flask-Migrate / Alembic version scripts
-├── tests/               # Automated unit tests
-├── config.py            # Environment configurations
-├── run.py               # Main execution entry point
-├── requirements.txt     # Python dependencies
-└── .env.example         # Environment template
-        </pre>
+        <h2 class="text-base font-semibold text-slate-800 mb-2">4. Database Migrations (Flask-Migrate)</h2>
+        <p class="text-sm text-slate-600 leading-relaxed">
+            All schema updates are tracked through versioned Alembic scripts in <code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">migrations/</code>, ensuring zero-loss schema upgrades.
+        </p>
     </div>
 </div>
 {% endblock %}

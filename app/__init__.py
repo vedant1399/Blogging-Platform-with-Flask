@@ -1,7 +1,7 @@
 import os
 from flask import Flask
 from config import config
-from app.extensions import db, migrate
+from app.extensions import db, migrate, login_manager
 
 def create_app(config_name=None):
     """Application Factory pattern implementation."""
@@ -19,12 +19,15 @@ def create_app(config_name=None):
     # Initialize extensions with app
     db.init_app(app)
     migrate.init_app(app, db)
+    login_manager.init_app(app)
 
     # Register Blueprints
     from app.main import main_bp
     from app.api import api_bp
+    from app.auth import auth_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp)
+    app.register_blueprint(auth_bp)
 
     return app
