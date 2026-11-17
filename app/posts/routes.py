@@ -1,5 +1,6 @@
 from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
+from sqlalchemy import func
 from app.posts import posts_bp
 from app.extensions import db
 from app.models import Post, Category, Tag, Comment
@@ -14,16 +15,76 @@ def get_category_choices():
 
 @posts_bp.route('/')
 def list_posts():
-    """List all blog posts with paginated navigation, category and tag filters."""
+    """List blog posts with search by title/content, category/tag filtering, and sorting."""
+    q = request.args.get('q', '').strip()
+    category_slug = request.args.get('category', '').strip()
+    tag_slug = request.args.get('tag', '').strip()
+    sort_by = request.args.get('sort', 'newest').strip()
     page = request.args.get('page', 1, type=int)
     per_page = 6
-    pagination = Post.query.order_by(Post.created_at.desc()).paginate(
-        page=page, per_page=per_page, error_out=False
-    )
+
+    query = Post.query
+
+    # Search filter: Title OR Content (case-insensitive)
+    if q:
+        search_pattern = f"%{q}%"
+        query = query.filter(
+            db.or_(
+                Post.title.ilike(search_pattern),
+                Post.content.ilike(search_pattern)
+            )
+        )
+
+    # Category filter
+    selected_category = None
+    if category_slug:
+        selected_category = Category.query.filter_by(slug=category_slug).first()
+        if selected_category:
+            query = query.filter(Post.category_id == selected_category.id)
+
+    # Tag filter
+    selected_tag = None
+    if tag_slug:
+        selected_tag = Tag.query.filter_by(slug=tag_slug).first()
+        if selected_tag:
+            query = query.filter(Post.tags.contains(selected_tag))
+
+    # Sorting
+    if sort_by == 'oldest':
+        query = query.order_by(Post.created_at.asc())
+    elif sort_by == 'popular':
+        # Order by comment count descending, then by publication date
+        query = query.outerjoin(Post.comments).group_by(Post.id).order_by(
+            func.count(Comment.id).desc(),
+            Post.created_at.desc()
+        )
+    else:  # 'newest' default
+        query = query.order_by(Post.created_at.desc())
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     posts = pagination.items
+
     categories = Category.query.order_by(Category.name).all()
     tags = Tag.query.order_by(Tag.name).all()
-    return render_template('posts/list.html', pagination=pagination, posts=posts, categories=categories, tags=tags)
+
+    return render_template(
+        'posts/list.html',
+        pagination=pagination,
+        posts=posts,
+        categories=categories,
+        tags=tags,
+        q=q,
+        selected_category=category_slug,
+        selected_tag=tag_slug,
+        selected_sort=sort_by
+    )
+
+
+@posts_bp.route('/search')
+def search():
+    """Search endpoint redirecting to list_posts with query string."""
+    q = request.args.get('q', '').strip()
+    return redirect(url_for('posts.list_posts', q=q))
 
 
 @posts_bp.route('/new', methods=['GET', 'POST'])
@@ -161,7 +222,6 @@ def delete_comment(comment_id):
         abort(404)
 
     post_id = comment.post_id
-    # Authorization: Either the comment author or the post owner can delete
     if comment.author != current_user and comment.post.author != current_user:
         flash('You are not authorized to delete this comment.', 'danger')
         return redirect(url_for('posts.post_detail', post_id=post_id) + '#comments')
@@ -179,7 +239,7 @@ def delete_comment(comment_id):
 
 @posts_bp.route('/category/<slug>')
 def category_posts(slug):
-    """Filter posts by category with pagination."""
+    """Filter posts by category with dedicated category template and pagination."""
     category = Category.query.filter_by(slug=slug).first_or_404()
     page = request.args.get('page', 1, type=int)
     per_page = 6
@@ -192,7 +252,7 @@ def category_posts(slug):
 
 @posts_bp.route('/tag/<slug>')
 def tag_posts(slug):
-    """Filter posts by tag with pagination."""
+    """Filter posts by tag with dedicated tag template and pagination."""
     tag = Tag.query.filter_by(slug=slug).first_or_404()
     page = request.args.get('page', 1, type=int)
     per_page = 6

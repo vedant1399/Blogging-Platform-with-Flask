@@ -1,26 +1,32 @@
-# Blogging Platform with Flask (Week 5: Commenting System)
+# Blogging Platform with Flask (Week 6: Search & Filtering)
 
 A modular, production-ready web application built with Flask for the **Blogging Platform with Flask** internship.
 
-Building upon Week 1 (Core Architecture & Migrations), Week 2 (Authentication & Sessions), Week 3 (CRUD & Taxonomy), and Week 4 (Frontend, Navigation & Pagination), **Week 5** delivers a complete **Interactive Commenting System** with relational models, Flask-WTF validation, and author/moderator deletion controls.
+Building upon Weeks 1 through 5, **Week 6** adds powerful **Search & Filtering Functionality**, allowing users to search posts across title and content, filter by category or tag, sort by newest/oldest/popularity, and navigate paginated results with preserved filters.
 
 ---
 
 ## 🌟 Key Features
 
+### Week 6: Search & Filtering Engine
+- **Search Across Title & Content**:
+  - Full case-insensitive search implemented using SQLAlchemy's `or_()` and `ilike()` operators: `db.or_(Post.title.ilike('%term%'), Post.content.ilike('%term%'))`.
+- **Taxonomy Filtering**:
+  - Filter by `Category` slug or `Tag` slug, seamlessly combinable with text searches.
+- **Dynamic Multi-Criteria Sorting**:
+  - `Newest First` (default): `Post.created_at.desc()`.
+  - `Oldest First`: `Post.created_at.asc()`.
+  - `Most Commented / Popular`: groups by post and sorts descending by `func.count(Comment.id)`.
+- **Search & Filter UI**:
+  - Top navigation bar quick search input.
+  - Interactive search and filter toolbar on the Explore page (`/posts/`) with an active filter summary and one-click reset.
+  - Clean empty state with search suggestions when no matching articles are found.
+  - Query parameters automatically preserved across pagination links.
+
 ### Week 5: Commenting System
-- **Relational Comment Model**:
-  - Links to `User` (author) and `Post` (article) via foreign keys.
-  - Cascade deletion enabled: deleting an article automatically removes all of its associated comments.
-- **Flask-WTF CommentForm**:
-  - Input length and content validation (`DataRequired`, `Length(2, 1000)`).
-  - Built-in CSRF token protection.
-- **Granular Permissions & Moderation**:
-  - Submitting comments requires an authenticated session (`@login_required`).
-  - Comment deletion permitted for either the **comment author** OR the **post owner** (enabling article moderation).
-- **Interactive UI**:
-  - Live comment count indicators across article headers, cards, and author profiles.
-  - Direct comment posting and instant feedback via flash messages.
+- Relational `Comment` model linked to `User` and `Post` with cascade deletion.
+- Flask-WTF `CommentForm` with CSRF protection and input validation.
+- Dual-authorization moderation (comment author and article owner can delete comments).
 
 ### Week 4: Frontend, Navigation & Pagination
 - Reusable Jinja2 macros (`render_pagination`, `render_post_card`).
@@ -54,28 +60,29 @@ Blogging-Platform-with-Flask/
 │   ├── extensions.py        # SQLAlchemy, Flask-Migrate, Flask-Login
 │   ├── models.py            # User, Post, Category, Tag, Comment models & associations
 │   ├── forms.py             # Flask-WTF forms (PostForm, CategoryForm, CommentForm, DeleteForm)
-│   ├── posts/               # Posts, Categories & Comments Blueprint
+│   ├── posts/               # Posts, Categories, Comments, Search & Filter Blueprint
 │   ├── auth/                # Auth Blueprint (Flask-Login)
 │   ├── main/                # Main Blueprint (home, author profiles, about, health)
 │   ├── api/                 # RESTful JSON API Blueprint
 │   ├── templates/           # Jinja2 templates
 │   │   ├── _macros.html     # Reusable pagination & post card macros
-│   │   ├── base.html        # Responsive navbar, flash banners, footer
+│   │   ├── base.html        # Responsive navbar with global search, flash banners, footer
 │   │   ├── index.html       # Home dashboard with paginated feed
 │   │   ├── about.html       # Architecture documentation
 │   │   ├── users/
 │   │   │   └── profile.html # Public author profile & paginated publications
 │   │   ├── auth/            # login.html, register.html, profile.html
-│   │   └── posts/           # create.html (Quill), detail.html (comments & prev/next), list.html, category.html, tag.html, categories.html
+│   │   └── posts/           # list.html (with search/filter toolbar), detail.html, create.html, categories.html
 │   └── static/              # CSS assets
 ├── migrations/              # Alembic database migration scripts
-├── tests/                   # Automated unit test suite (32 tests)
+├── tests/                   # Automated unit test suite (40 tests)
 │   ├── __init__.py
 │   ├── test_basics.py       # Factory & baseline tests
 │   ├── test_auth.py         # Registration & login tests
 │   ├── test_posts.py        # Post CRUD & authorization tests
 │   ├── test_frontend_pagination.py # Pagination, navigation, filters & profile tests
-│   └── test_comments.py     # Comment creation, cascade deletion & moderation tests
+│   ├── test_comments.py     # Comment creation, cascade deletion & moderation tests
+│   └── test_search_filter.py# Search by title/content, category/tag filter & sort tests
 ├── instance/                # SQLite database storage (gitignored)
 ├── config.py                # Environment configuration classes
 ├── run.py                   # Application entrypoint & CLI shell context
@@ -126,7 +133,7 @@ Run the full automated test suite:
 ```bash
 python -m unittest discover tests
 ```
-**Status: 32/32 unit tests passing.**
+**Status: 40/40 unit tests passing.**
 
 ---
 
@@ -135,7 +142,8 @@ python -m unittest discover tests
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
 | `GET` | `/` | Public | Home page with paginated feed & category navigation |
-| `GET` | `/posts/` | Public | Explore all articles with paginated browsing |
+| `GET` | `/posts/` | Public | Explore articles with search (`?q=`), category (`?category=`), tag (`?tag=`), and sort (`?sort=`) |
+| `GET` | `/posts/search` | Public | Search redirect endpoint |
 | `GET` | `/posts/<id>` | Public | Full post view with comments & prev/next links |
 | `POST` | `/posts/<id>/comments` | Logged In | Post a comment on an article |
 | `POST` | `/posts/comments/<id>/delete` | Author/Owner | Delete a comment |
@@ -151,6 +159,7 @@ python -m unittest discover tests
 ---
 
 ## 📚 References
+- [SQLAlchemy ORM Querying Guide](https://www.sqlalchemy.org/library.html#orm-querying)
 - [Flask SQLite3 Patterns](https://flask.palletsprojects.com/en/2.3.x/patterns/sqlite3/)
 - [Flask-SQLAlchemy Documentation](https://flask-sqlalchemy.palletsprojects.com/)
 - [Flask-WTF Documentation](https://flask-wtf.readthedocs.io/en/1.2.x/)
