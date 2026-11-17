@@ -1,0 +1,24 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: blogging-platform-flask:latest
+    container_name: flask_blog_app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_CONFIG=production
+      - SECRET_KEY=production-secure-random-secret-key-change-me
+      - GUNICORN_WORKERS=4
+      - GUNICORN_BIND=0.0.0.0:5000
+    volumes:
+      # Persistent storage volume for SQLite database
+      - ./instance:/app/instance
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

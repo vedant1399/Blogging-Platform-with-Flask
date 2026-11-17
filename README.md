@@ -1,27 +1,37 @@
-# Blogging Platform with Flask (Week 6: Search & Filtering)
+# Blogging Platform with Flask (Week 7: Deployment Preparation & Testing)
 
 A modular, production-ready web application built with Flask for the **Blogging Platform with Flask** internship.
 
-Building upon Weeks 1 through 5, **Week 6** adds powerful **Search & Filtering Functionality**, allowing users to search posts across title and content, filter by category or tag, sort by newest/oldest/popularity, and navigate paginated results with preserved filters.
+Building upon Weeks 1 through 6, **Week 7** completes the platform with **Deployment Preparation and Comprehensive Testing**: a robust automated unit test suite (45 unit tests across 7 test modules), production WSGI callable (`wsgi.py`), tuned Gunicorn configuration (`gunicorn.conf.py`), multi-stage Docker containerization (`Dockerfile`, `.dockerignore`), multi-container orchestration (`docker-compose.yml`), custom HTTP error pages (404, 403, 500), and automated GitHub Actions Continuous Integration (CI).
 
 ---
 
 ## 🌟 Key Features
 
+### Week 7: Deployment Preparation & Automated Testing
+- **Comprehensive Unit Testing Suite**:
+  - 45 automated unit tests spanning 7 test modules (`test_basics.py`, `test_auth.py`, `test_posts.py`, `test_frontend_pagination.py`, `test_comments.py`, `test_search_filter.py`, `test_deployment.py`).
+  - Tests covering application factory, configuration switching, authentication, CRUD, pagination, comments cascade deletion, full-text search, category/tag filtering, error pages, and WSGI compatibility.
+- **Production WSGI Callable (`wsgi.py`)**:
+  - Standards-compliant WSGI entrypoint exposing `app` for production servers like Gunicorn and uWSGI.
+- **Tuned Gunicorn Configuration (`gunicorn.conf.py`)**:
+  - Multi-process worker management (`2 * CPU + 1`), sync workers, request backlog, worker timeout (120s), and stdout/stderr logging integration.
+- **Docker Containerization (`Dockerfile` & `.dockerignore`)**:
+  - Lightweight `python:3.12-slim` base image.
+  - Principle of least privilege: runs under an unprivileged user `appuser` (UID 1000).
+  - Built-in `HEALTHCHECK` probing the `/health` endpoint.
+- **Docker Compose (`docker-compose.yml`)**:
+  - One-command startup (`docker compose up --build`).
+  - Persistent volume binding for `./instance` to preserve database and uploads across container recycles.
+- **Custom HTTP Error Handlers**:
+  - User-friendly and brand-consistent Jinja2 error templates for **404 Not Found**, **403 Forbidden**, and **500 Internal Server Error** in `app/templates/errors/`.
+- **Continuous Integration (CI)**:
+  - GitHub Actions workflow (`.github/workflows/tests.yml`) testing on Python 3.11 and 3.12 across every push and pull request.
+
 ### Week 6: Search & Filtering Engine
-- **Search Across Title & Content**:
-  - Full case-insensitive search implemented using SQLAlchemy's `or_()` and `ilike()` operators: `db.or_(Post.title.ilike('%term%'), Post.content.ilike('%term%'))`.
-- **Taxonomy Filtering**:
-  - Filter by `Category` slug or `Tag` slug, seamlessly combinable with text searches.
-- **Dynamic Multi-Criteria Sorting**:
-  - `Newest First` (default): `Post.created_at.desc()`.
-  - `Oldest First`: `Post.created_at.asc()`.
-  - `Most Commented / Popular`: groups by post and sorts descending by `func.count(Comment.id)`.
-- **Search & Filter UI**:
-  - Top navigation bar quick search input.
-  - Interactive search and filter toolbar on the Explore page (`/posts/`) with an active filter summary and one-click reset.
-  - Clean empty state with search suggestions when no matching articles are found.
-  - Query parameters automatically preserved across pagination links.
+- **Search Across Title & Content**: Full case-insensitive search using SQLAlchemy `or_()` and `ilike()`.
+- **Taxonomy Filtering**: Filter by Category or Tag slug.
+- **Dynamic Sorting**: Newest, Oldest, and Most Commented/Popular.
 
 ### Week 5: Commenting System
 - Relational `Comment` model linked to `User` and `Post` with cascade deletion.
@@ -55,8 +65,11 @@ Building upon Weeks 1 through 5, **Week 6** adds powerful **Search & Filtering F
 
 ```text
 Blogging-Platform-with-Flask/
+├── .github/
+│   └── workflows/
+│       └── tests.yml        # GitHub Actions CI workflow (Python 3.11 & 3.12)
 ├── app/
-│   ├── __init__.py          # create_app() factory, custom filters (reading_time, format_datetime)
+│   ├── __init__.py          # create_app() factory, error handlers, template filters
 │   ├── extensions.py        # SQLAlchemy, Flask-Migrate, Flask-Login
 │   ├── models.py            # User, Post, Category, Tag, Comment models & associations
 │   ├── forms.py             # Flask-WTF forms (PostForm, CategoryForm, CommentForm, DeleteForm)
@@ -68,24 +81,31 @@ Blogging-Platform-with-Flask/
 │   │   ├── _macros.html     # Reusable pagination & post card macros
 │   │   ├── base.html        # Responsive navbar with global search, flash banners, footer
 │   │   ├── index.html       # Home dashboard with paginated feed
-│   │   ├── about.html       # Architecture documentation
+│   │   ├── about.html       # Architecture & deployment documentation
+│   │   ├── errors/          # Custom HTTP error pages (403.html, 404.html, 500.html)
 │   │   ├── users/
 │   │   │   └── profile.html # Public author profile & paginated publications
 │   │   ├── auth/            # login.html, register.html, profile.html
-│   │   └── posts/           # list.html (with search/filter toolbar), detail.html, create.html, categories.html
+│   │   └── posts/           # list.html, detail.html, create.html, categories.html
 │   └── static/              # CSS assets
 ├── migrations/              # Alembic database migration scripts
-├── tests/                   # Automated unit test suite (40 tests)
+├── tests/                   # Automated unit test suite (45 unit tests)
 │   ├── __init__.py
 │   ├── test_basics.py       # Factory & baseline tests
 │   ├── test_auth.py         # Registration & login tests
 │   ├── test_posts.py        # Post CRUD & authorization tests
 │   ├── test_frontend_pagination.py # Pagination, navigation, filters & profile tests
 │   ├── test_comments.py     # Comment creation, cascade deletion & moderation tests
-│   └── test_search_filter.py# Search by title/content, category/tag filter & sort tests
+│   ├── test_search_filter.py# Search by title/content, category/tag filter & sort tests
+│   └── test_deployment.py   # WSGI, Gunicorn configs, error handlers & healthcheck tests
 ├── instance/                # SQLite database storage (gitignored)
+├── Dockerfile               # Production Docker container definition
+├── docker-compose.yml       # Multi-container local orchestration
+├── .dockerignore            # Docker build ignore rules
+├── gunicorn.conf.py         # Production Gunicorn configuration
+├── wsgi.py                  # Production WSGI application entrypoint
 ├── config.py                # Environment configuration classes
-├── run.py                   # Application entrypoint & CLI shell context
+├── run.py                   # Development application entrypoint
 ├── requirements.txt         # Pinned project dependencies
 ├── .env.example             # Template for environment variables
 ├── .gitignore               # Git ignore rules
@@ -94,13 +114,9 @@ Blogging-Platform-with-Flask/
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 Deployment & Quick Start Guide
 
-### 1. Prerequisites
-- Python 3.10+ installed
-- Git installed
-
-### 2. Clone & Setup
+### 1. Local Development
 ```bash
 git clone https://github.com/vedant1399/Blogging-Platform-with-Flask.git
 cd Blogging-Platform-with-Flask
@@ -113,17 +129,29 @@ source venv/bin/activate  # On macOS/Linux
 # Install dependencies
 pip install -r requirements.txt
 
-# Configure environment variables
-copy .env.example .env    # On Windows
-cp .env.example .env      # On macOS/Linux
-
-# Run database migrations
+# Run migrations & start server
 flask db upgrade
-
-# Start development server
 python run.py
 ```
 Open **`http://127.0.0.1:5000`** in your browser.
+
+### 2. Production with Gunicorn
+Run the production WSGI server using the tuned configuration:
+```bash
+gunicorn -c gunicorn.conf.py wsgi:app
+```
+
+### 3. Docker Deployment
+Build and run the containerized app:
+```bash
+# Using Docker directly
+docker build -t blogging-platform-flask .
+docker run -d -p 5000:5000 -v $(pwd)/instance:/app/instance --name flask-app blogging-platform-flask
+
+# Or using Docker Compose (Recommended)
+docker compose up --build -d
+```
+Access the application at **`http://localhost:5000`**. Check status via `http://localhost:5000/health`.
 
 ---
 
@@ -133,7 +161,7 @@ Run the full automated test suite:
 ```bash
 python -m unittest discover tests
 ```
-**Status: 40/40 unit tests passing.**
+**Status: 45/45 unit tests passing.**
 
 ---
 
@@ -142,6 +170,7 @@ python -m unittest discover tests
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
 | `GET` | `/` | Public | Home page with paginated feed & category navigation |
+| `GET` | `/health` | Public | Container & orchestrator health check endpoint |
 | `GET` | `/posts/` | Public | Explore articles with search (`?q=`), category (`?category=`), tag (`?tag=`), and sort (`?sort=`) |
 | `GET` | `/posts/search` | Public | Search redirect endpoint |
 | `GET` | `/posts/<id>` | Public | Full post view with comments & prev/next links |
@@ -159,6 +188,8 @@ python -m unittest discover tests
 ---
 
 ## 📚 References
+- [Flask Testing Documentation](https://flask.palletsprojects.com/en/2.3.x/testing/)
+- [Flask Deploying Documentation](https://flask.palletsprojects.com/en/2.3.x/deploying/)
 - [SQLAlchemy ORM Querying Guide](https://www.sqlalchemy.org/library.html#orm-querying)
 - [Flask SQLite3 Patterns](https://flask.palletsprojects.com/en/2.3.x/patterns/sqlite3/)
 - [Flask-SQLAlchemy Documentation](https://flask-sqlalchemy.palletsprojects.com/)

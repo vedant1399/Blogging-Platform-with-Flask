@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Internal Server Error - 500{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-10 rounded-3xl shadow-sm border border-slate-200 text-center space-y-4 my-12">
+    <div class="w-16 h-16 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto text-2xl font-extrabold">
+        500
+    </div>
+    <h1 class="text-2xl font-extrabold text-slate-900">Internal Server Error</h1>
+    <p class="text-xs text-slate-500 leading-relaxed">
+        Something unexpected occurred on our servers. Our team has been notified and is looking into it.
+    </p>
+    <div class="pt-3">
+        <a href="{{ url_for('main.index') }}" class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-5 py-2.5 rounded-xl transition shadow-sm">
+            ← Return to Home
+        </a>
+    </div>
+</div>
+{% endblock %}
