@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Blogging Platform with Flask - Week 1{% endblock %}</title>
+    <!-- Modern Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Navbar -->
+    <nav class="bg-indigo-600 text-white shadow-md">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="{{ url_for('main.index') }}" class="font-bold text-xl tracking-wide flex items-center space-x-2">
+                <span>✍️ Flask Blogging Platform</span>
+            </a>
+            <div class="space-x-6 text-sm font-medium">
+                <a href="{{ url_for('main.index') }}" class="hover:text-indigo-200 transition">Home</a>
+                <a href="{{ url_for('main.about') }}" class="hover:text-indigo-200 transition">About Architecture</a>
+                <a href="{{ url_for('api.get_users') }}" target="_blank" class="hover:text-indigo-200 transition">API Users</a>
+                <a href="{{ url_for('api.get_posts') }}" target="_blank" class="hover:text-indigo-200 transition">API Posts</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-8">
+        <div class="max-w-6xl mx-auto px-4 text-center text-xs text-slate-500">
+            Blogging Platform with Flask • Week 1: Flask Setup, Blueprints, SQLAlchemy & Flask-Migrate
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
