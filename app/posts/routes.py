@@ -2,8 +2,8 @@ from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
 from app.posts import posts_bp
 from app.extensions import db
-from app.models import Post, Category, Tag
-from app.forms import PostForm, CategoryForm, DeleteForm
+from app.models import Post, Category, Tag, Comment
+from app.forms import PostForm, CategoryForm, CommentForm, DeleteForm
 
 
 def get_category_choices():
@@ -41,7 +41,6 @@ def create_post():
             user_id=current_user.id,
             category_id=category_id
         )
-        # Associate tags
         if form.tags.data:
             post.set_tags_from_string(form.tags.data)
 
@@ -55,14 +54,22 @@ def create_post():
 
 @posts_bp.route('/<int:post_id>')
 def post_detail(post_id):
-    """View a single blog post in detail with breadcrumbs & prev/next navigation."""
+    """View a single blog post in detail with comments, breadcrumbs & navigation."""
     post = db.session.get(Post, post_id)
     if not post:
         abort(404)
     delete_form = DeleteForm()
+    comment_form = CommentForm()
     prev_post = Post.query.filter(Post.id < post.id).order_by(Post.id.desc()).first()
     next_post = Post.query.filter(Post.id > post.id).order_by(Post.id.asc()).first()
-    return render_template('posts/detail.html', post=post, delete_form=delete_form, prev_post=prev_post, next_post=next_post)
+    return render_template(
+        'posts/detail.html',
+        post=post,
+        delete_form=delete_form,
+        comment_form=comment_form,
+        prev_post=prev_post,
+        next_post=next_post
+    )
 
 
 @posts_bp.route('/<int:post_id>/edit', methods=['GET', 'POST'])
@@ -118,6 +125,56 @@ def delete_post(post_id):
 
     flash('Invalid delete request.', 'danger')
     return redirect(url_for('posts.post_detail', post_id=post.id))
+
+
+@posts_bp.route('/<int:post_id>/comments', methods=['POST'])
+@login_required
+def add_comment(post_id):
+    """Add a new comment to a post (Authenticated users only)."""
+    post = db.session.get(Post, post_id)
+    if not post:
+        abort(404)
+
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment(
+            content=form.content.data.strip(),
+            user_id=current_user.id,
+            post_id=post.id
+        )
+        db.session.add(comment)
+        db.session.commit()
+        flash('Your comment has been posted!', 'success')
+    else:
+        for error in form.content.errors:
+            flash(error, 'danger')
+
+    return redirect(url_for('posts.post_detail', post_id=post.id) + '#comments')
+
+
+@posts_bp.route('/comments/<int:comment_id>/delete', methods=['POST'])
+@login_required
+def delete_comment(comment_id):
+    """Delete a comment (Comment author or Post author only)."""
+    comment = db.session.get(Comment, comment_id)
+    if not comment:
+        abort(404)
+
+    post_id = comment.post_id
+    # Authorization: Either the comment author or the post owner can delete
+    if comment.author != current_user and comment.post.author != current_user:
+        flash('You are not authorized to delete this comment.', 'danger')
+        return redirect(url_for('posts.post_detail', post_id=post_id) + '#comments')
+
+    delete_form = DeleteForm()
+    if delete_form.validate_on_submit():
+        db.session.delete(comment)
+        db.session.commit()
+        flash('Comment deleted.', 'info')
+    else:
+        flash('Invalid request.', 'danger')
+
+    return redirect(url_for('posts.post_detail', post_id=post_id) + '#comments')
 
 
 @posts_bp.route('/category/<slug>')

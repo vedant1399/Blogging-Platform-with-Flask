@@ -6,48 +6,55 @@
 <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-sm border border-slate-200 p-8 md:p-10 space-y-8">
     <div class="border-b border-slate-100 pb-4">
         <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">System Architecture & Technical Design</h1>
-        <p class="text-xs text-slate-500 mt-1">Full stack architecture documentation across Weeks 1 to 4</p>
+        <p class="text-xs text-slate-500 mt-1">Full stack architecture documentation across Weeks 1 to 5</p>
+    </div>
+
+    <div>
+        <h2 class="text-lg font-bold text-slate-900 mb-2">1. Commenting System & Relational Models (Week 5)</h2>
+        <p class="text-sm text-slate-600 leading-relaxed mb-3">
+            The commenting system enables interactive discussions on published blog posts:
+        </p>
+        <ul class="list-disc list-inside text-sm text-slate-600 space-y-1.5">
+            <li><strong class="font-semibold text-slate-800">Comment Model</strong>: Links to <code class="font-mono text-xs">User</code> (author) and <code class="font-mono text-xs">Post</code> (target article) with cascade deletion so removing a post cleans up all its discussion comments.</li>
+            <li><strong class="font-semibold text-slate-800">Flask-WTF CommentForm</strong>: Input validation (<code class="font-mono text-xs">DataRequired</code>, <code class="font-mono text-xs">Length(2, 1000)</code>) and CSRF token protection.</li>
+            <li><strong class="font-semibold text-slate-800">Granular Authorization</strong>: Adding comments is protected with <code class="font-mono text-xs">@login_required</code>. Comment deletion is permitted for either the <em>comment author</em> or the <em>post owner</em> (moderation).</li>
+            <li><strong class="font-semibold text-slate-800">Dynamic UI</strong>: Displays real-time comment counts, author avatars, timestamps, and contextual delete controls.</li>
+        </ul>
     </div>
     
     <div>
-        <h2 class="text-lg font-bold text-slate-900 mb-2">1. Modular Jinja2 Templating & Macro Architecture (Week 4)</h2>
-        <p class="text-sm text-slate-600 leading-relaxed mb-3">
-            The presentation layer leverages Jinja2 template inheritance, custom filters, and reusable component macros (<code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">app/templates/_macros.html</code>):
-        </p>
+        <h2 class="text-lg font-bold text-slate-900 mb-2">2. Modular Jinja2 Templating & Pagination (Week 4)</h2>
         <ul class="list-disc list-inside text-sm text-slate-600 space-y-1.5">
-            <li><strong class="font-semibold text-slate-800">render_pagination Macro</strong>: Dynamically generates page numbers, previous/next states, active indicators, and query preservation.</li>
-            <li><strong class="font-semibold text-slate-800">render_post_card Macro</strong>: Reusable card layout rendering categories, tags, estimated reading time, author, and timestamp.</li>
-            <li><strong class="font-semibold text-slate-800">Custom Template Filters</strong>: <code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">reading_time</code> (calculates estimated reading time based on word count) and <code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">format_datetime</code>.</li>
-            <li><strong class="font-semibold text-slate-800">Breadcrumbs & Navigational Links</strong>: Multi-level breadcrumbs and sequential previous/next article browsing on individual post pages.</li>
-            <li><strong class="font-semibold text-slate-800">Public Author Profiles</strong>: Dedicated profile routes at <code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">/users/&lt;username&gt;</code> displaying author metadata and paginated publication archives.</li>
+            <li><strong class="font-semibold text-slate-800">render_pagination Macro</strong>: Numbered page navigation with active indicators, disabled boundary buttons, and query preservation.</li>
+            <li><strong class="font-semibold text-slate-800">render_post_card Macro</strong>: Card layout rendering categories, tags, estimated reading time, comment count, and author.</li>
+            <li><strong class="font-semibold text-slate-800">Custom Template Filters</strong>: <code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">reading_time</code> and <code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">format_datetime</code>.</li>
+            <li><strong class="font-semibold text-slate-800">Public Author Profiles</strong>: Profiles at <code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">/users/&lt;username&gt;</code> with paginated articles.</li>
         </ul>
     </div>
 
     <div>
-        <h2 class="text-lg font-bold text-slate-900 mb-2">2. Blog Post CRUD & Taxonomy (Week 3)</h2>
+        <h2 class="text-lg font-bold text-slate-900 mb-2">3. Blog Post CRUD & Taxonomy (Week 3)</h2>
         <ul class="list-disc list-inside text-sm text-slate-600 space-y-1.5">
-            <li>Full lifecycle: Create, Read, Update, Delete with author-level authorization checks.</li>
+            <li>Full CRUD lifecycle with author permission checks.</li>
             <li>One-to-Many <code class="font-mono text-xs">Category</code> and Many-to-Many <code class="font-mono text-xs">Tag</code> relational modeling via the <code class="font-mono text-xs">post_tags</code> association table.</li>
-            <li>Flask-WTF form validation with CSRF security tokens and dynamic category pickers.</li>
-            <li>Quill.js Rich Text Editor integration with client-side synchronization.</li>
+            <li>Flask-WTF forms and Quill.js rich text editor integration.</li>
         </ul>
     </div>
 
     <div>
-        <h2 class="text-lg font-bold text-slate-900 mb-2">3. User Authentication & Sessions (Week 2)</h2>
+        <h2 class="text-lg font-bold text-slate-900 mb-2">4. User Authentication & Sessions (Week 2)</h2>
         <ul class="list-disc list-inside text-sm text-slate-600 space-y-1.5">
             <li>User registration, login, logout, and persistent session management powered by Flask-Login.</li>
-            <li>Cryptographic one-way password hashing using Werkzeug security functions (<code class="font-mono text-xs">generate_password_hash</code>).</li>
-            <li>Route protection with the <code class="font-mono text-xs">@login_required</code> decorator and session-aware navigation bar.</li>
+            <li>Salted one-way password hashing using Werkzeug security.</li>
         </ul>
     </div>
 
     <div>
-        <h2 class="text-lg font-bold text-slate-900 mb-2">4. Core Architecture & Migrations (Week 1)</h2>
+        <h2 class="text-lg font-bold text-slate-900 mb-2">5. Core Architecture & Migrations (Week 1)</h2>
         <ul class="list-disc list-inside text-sm text-slate-600 space-y-1.5">
-            <li>Application Factory pattern (<code class="font-mono text-xs">create_app()</code>) supporting development, testing, and production environments.</li>
-            <li>Four dedicated Blueprints: <code class="font-mono text-xs">main_bp</code>, <code class="font-mono text-xs">auth_bp</code>, <code class="font-mono text-xs">posts_bp</code>, and <code class="font-mono text-xs">api_bp</code>.</li>
-            <li>Database migrations tracked via Alembic / Flask-Migrate in <code class="font-mono text-xs">migrations/</code>.</li>
+            <li>Application Factory pattern (<code class="font-mono text-xs">create_app()</code>) with environment configurations.</li>
+            <li>Modular Blueprints (<code class="font-mono text-xs">main_bp</code>, <code class="font-mono text-xs">auth_bp</code>, <code class="font-mono text-xs">posts_bp</code>, <code class="font-mono text-xs">api_bp</code>).</li>
+            <li>Database schema migrations tracked via Alembic / Flask-Migrate in <code class="font-mono text-xs">migrations/</code>.</li>
         </ul>
     </div>
 </div>

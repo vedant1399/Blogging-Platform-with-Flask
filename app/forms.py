@@ -33,6 +33,15 @@ class CategoryForm(FlaskForm):
     submit = SubmitField('Create Category')
 
 
+class CommentForm(FlaskForm):
+    """Flask-WTF Form for post comments."""
+    content = TextAreaField('Comment', validators=[
+        DataRequired(message='Comment cannot be empty.'),
+        Length(min=2, max=1000, message='Comment must be between 2 and 1000 characters.')
+    ])
+    submit = SubmitField('Submit Comment')
+
+
 class DeleteForm(FlaskForm):
     """Flask-WTF CSRF-protected delete confirmation form."""
     submit = SubmitField('Delete')

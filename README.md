@@ -1,35 +1,37 @@
-# Blogging Platform with Flask (Week 4: Frontend: Displaying Posts and Navigation)
+# Blogging Platform with Flask (Week 5: Commenting System)
 
 A modular, production-ready web application built with Flask for the **Blogging Platform with Flask** internship.
 
-Building upon Week 1 (Core Architecture & Migrations), Week 2 (Authentication & Sessions), and Week 3 (CRUD & Taxonomy), **Week 4** enhances the **Frontend Experience** with modular Jinja2 templates, a reusable macro-based **Pagination System**, **Individual Post Views** with breadcrumb navigation and prev/next links, and **Public Author Profile Pages**.
+Building upon Week 1 (Core Architecture & Migrations), Week 2 (Authentication & Sessions), Week 3 (CRUD & Taxonomy), and Week 4 (Frontend, Navigation & Pagination), **Week 5** delivers a complete **Interactive Commenting System** with relational models, Flask-WTF validation, and author/moderator deletion controls.
 
 ---
 
 ## 🌟 Key Features
 
+### Week 5: Commenting System
+- **Relational Comment Model**:
+  - Links to `User` (author) and `Post` (article) via foreign keys.
+  - Cascade deletion enabled: deleting an article automatically removes all of its associated comments.
+- **Flask-WTF CommentForm**:
+  - Input length and content validation (`DataRequired`, `Length(2, 1000)`).
+  - Built-in CSRF token protection.
+- **Granular Permissions & Moderation**:
+  - Submitting comments requires an authenticated session (`@login_required`).
+  - Comment deletion permitted for either the **comment author** OR the **post owner** (enabling article moderation).
+- **Interactive UI**:
+  - Live comment count indicators across article headers, cards, and author profiles.
+  - Direct comment posting and instant feedback via flash messages.
+
 ### Week 4: Frontend, Navigation & Pagination
-- **Jinja2 Macros & Template Architecture**:
-  - `render_pagination`: Reusable numbered pagination with previous/next controls, disabled boundary states, page summaries, and query preservation.
-  - `render_post_card`: Consistent, modular card layout displaying categories, tags, estimated reading time, author, and timestamp.
-- **Full Database-Backed Pagination**:
-  - Implemented across the Home page (`/`), Posts explore listing (`/posts/`), Category archive (`/posts/category/<slug>`), Tag archive (`/posts/tag/<slug>`), and Author profiles (`/users/<username>`).
-- **Individual Post View & Enhanced Navigation**:
-  - Multi-level breadcrumbs navigation (`Home > Articles > Category > Post Title`).
-  - Formatted rich text content display with author card, tags, and timestamps.
-  - Sequential **Previous Article** and **Next Article** navigation links.
-- **Author Profile Pages**:
-  - Public author profile page (`/users/<username>`) displaying author bio, join date, total article count, and a paginated archive of their published articles.
-  - Private user dashboard (`/auth/profile`) with quick management shortcuts.
-- **Custom Jinja2 Filters**:
-  - `reading_time`: Automatically calculates estimated read time based on word count.
-  - `format_datetime`: Formats timestamps into human-readable dates.
+- Reusable Jinja2 macros (`render_pagination`, `render_post_card`).
+- Full database-backed pagination across Home, Posts, Categories, Tags, and Profiles.
+- Individual post view with breadcrumbs and sequential Previous/Next article navigation.
+- Public author profile pages (`/users/<username>`).
 
 ### Week 3: Blog Post CRUD & Taxonomy
 - Complete CRUD operations guarded by author-level authorization.
-- `Category` (One-to-Many) and `Tag` (Many-to-Many via `post_tags` association table) relational models.
-- Flask-WTF forms (`PostForm`, `CategoryForm`, `DeleteForm`) with CSRF protection.
-- Quill.js Rich Text Editor integration with client-side synchronization.
+- `Category` (One-to-Many) and `Tag` (Many-to-Many) relational models.
+- Flask-WTF forms and Quill.js Rich Text Editor integration.
 
 ### Week 2: User Authentication & Sessions
 - User registration, login, logout, and session management using **Flask-Login**.
@@ -50,9 +52,9 @@ Blogging-Platform-with-Flask/
 ├── app/
 │   ├── __init__.py          # create_app() factory, custom filters (reading_time, format_datetime)
 │   ├── extensions.py        # SQLAlchemy, Flask-Migrate, Flask-Login
-│   ├── models.py            # User, Post, Category, Tag models & post_tags association
-│   ├── forms.py             # Flask-WTF forms (PostForm, CategoryForm, DeleteForm)
-│   ├── posts/               # Posts & Categories Blueprint
+│   ├── models.py            # User, Post, Category, Tag, Comment models & associations
+│   ├── forms.py             # Flask-WTF forms (PostForm, CategoryForm, CommentForm, DeleteForm)
+│   ├── posts/               # Posts, Categories & Comments Blueprint
 │   ├── auth/                # Auth Blueprint (Flask-Login)
 │   ├── main/                # Main Blueprint (home, author profiles, about, health)
 │   ├── api/                 # RESTful JSON API Blueprint
@@ -64,15 +66,16 @@ Blogging-Platform-with-Flask/
 │   │   ├── users/
 │   │   │   └── profile.html # Public author profile & paginated publications
 │   │   ├── auth/            # login.html, register.html, profile.html
-│   │   └── posts/           # create.html (Quill), detail.html (breadcrumbs & prev/next), list.html, category.html, tag.html, categories.html
+│   │   └── posts/           # create.html (Quill), detail.html (comments & prev/next), list.html, category.html, tag.html, categories.html
 │   └── static/              # CSS assets
 ├── migrations/              # Alembic database migration scripts
-├── tests/                   # Automated unit test suite (24 tests)
+├── tests/                   # Automated unit test suite (32 tests)
 │   ├── __init__.py
 │   ├── test_basics.py       # Factory & baseline tests
 │   ├── test_auth.py         # Registration & login tests
 │   ├── test_posts.py        # Post CRUD & authorization tests
-│   └── test_frontend_pagination.py # Pagination, navigation, filters & profile tests
+│   ├── test_frontend_pagination.py # Pagination, navigation, filters & profile tests
+│   └── test_comments.py     # Comment creation, cascade deletion & moderation tests
 ├── instance/                # SQLite database storage (gitignored)
 ├── config.py                # Environment configuration classes
 ├── run.py                   # Application entrypoint & CLI shell context
@@ -123,31 +126,32 @@ Run the full automated test suite:
 ```bash
 python -m unittest discover tests
 ```
-**Status: 24/24 unit tests passing.**
+**Status: 32/32 unit tests passing.**
 
 ---
 
-## 📡 Routes & Pages
+## 📡 Routes & Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/` | Home page with paginated feed & category navigation |
-| `GET` | `/posts/` | Explore all articles with paginated browsing |
-| `GET` | `/posts/<id>` | Full post view with breadcrumbs & prev/next links |
-| `GET` | `/users/<username>` | Public author profile with paginated authored articles |
-| `GET` | `/posts/category/<slug>` | Category-filtered paginated articles |
-| `GET` | `/posts/tag/<slug>` | Tag-filtered paginated articles |
-| `GET, POST` | `/posts/new` | Create article with Quill.js rich text editor |
-| `GET, POST` | `/posts/<id>/edit` | Edit article (author only) |
-| `POST` | `/posts/<id>/delete` | Delete article (author only, CSRF protected) |
-| `GET, POST` | `/auth/login` | User login & session management |
-| `GET, POST` | `/auth/register` | Author registration |
-| `GET` | `/auth/profile` | Private user account dashboard |
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `GET` | `/` | Public | Home page with paginated feed & category navigation |
+| `GET` | `/posts/` | Public | Explore all articles with paginated browsing |
+| `GET` | `/posts/<id>` | Public | Full post view with comments & prev/next links |
+| `POST` | `/posts/<id>/comments` | Logged In | Post a comment on an article |
+| `POST` | `/posts/comments/<id>/delete` | Author/Owner | Delete a comment |
+| `GET` | `/users/<username>` | Public | Public author profile with paginated articles |
+| `GET` | `/posts/category/<slug>` | Public | Category-filtered paginated articles |
+| `GET` | `/posts/tag/<slug>` | Public | Tag-filtered paginated articles |
+| `GET, POST` | `/posts/new` | Logged In | Create article with Quill.js rich text editor |
+| `GET, POST` | `/posts/<id>/edit` | Author Only | Edit article (author only) |
+| `POST` | `/posts/<id>/delete` | Author Only | Delete article (author only) |
+| `GET, POST` | `/auth/login` | Public | User login & session management |
+| `GET, POST` | `/auth/register` | Public | Author registration |
 
 ---
 
 ## 📚 References
-- [Jinja2 Templates Documentation](https://jinja.palletsprojects.com/en/3.1.x/templates/)
-- [Flask-SQLAlchemy Pagination](https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/pagination/)
+- [Flask SQLite3 Patterns](https://flask.palletsprojects.com/en/2.3.x/patterns/sqlite3/)
+- [Flask-SQLAlchemy Documentation](https://flask-sqlalchemy.palletsprojects.com/)
 - [Flask-WTF Documentation](https://flask-wtf.readthedocs.io/en/1.2.x/)
 - [Flask-Login Documentation](https://flask-login.readthedocs.io/en/latest/)

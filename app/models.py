@@ -22,8 +22,9 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
-    # Relationship to Blog Posts
+    # Relationships
     posts = db.relationship('Post', backref='author', lazy='dynamic', cascade='all, delete-orphan')
+    comments = db.relationship('Comment', backref='author', lazy='dynamic', cascade='all, delete-orphan')
 
     def set_password(self, password):
         """Hash and store the user's password."""
@@ -41,7 +42,8 @@ class User(UserMixin, db.Model):
             'username': self.username,
             'email': self.email,
             'created_at': self.created_at.isoformat() if self.created_at else None,
-            'post_count': self.posts.count()
+            'post_count': self.posts.count(),
+            'comment_count': self.comments.count()
         }
 
     def __repr__(self):
@@ -116,7 +118,7 @@ class Tag(db.Model):
 
 
 class Post(db.Model):
-    """Blog Post database model with Category and Tags."""
+    """Blog Post database model with Category, Tags, and Comments."""
     __tablename__ = 'posts'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -130,8 +132,9 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
 
-    # Many-to-Many with Tag
+    # Relationships
     tags = db.relationship('Tag', secondary=post_tags, backref=db.backref('posts', lazy='dynamic'))
+    comments = db.relationship('Comment', backref='post', lazy='dynamic', cascade='all, delete-orphan', order_by='Comment.created_at.asc()')
 
     def __init__(self, title, content, user_id, category_id=None, summary=None, slug=None):
         self.title = title
@@ -173,8 +176,34 @@ class Post(db.Model):
             'user_id': self.user_id,
             'author': self.author.username if self.author else None,
             'category': self.category.name if self.category else None,
-            'tags': [t.name for t in self.tags]
+            'tags': [t.name for t in self.tags],
+            'comment_count': self.comments.count()
         }
 
     def __repr__(self):
         return f'<Post {self.title}>'
+
+
+class Comment(db.Model):
+    """Comment database model on blog posts."""
+    __tablename__ = 'comments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'content': self.content,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'user_id': self.user_id,
+            'author': self.author.username if self.author else None,
+            'post_id': self.post_id
+        }
+
+    def __repr__(self):
+        return f'<Comment {self.id} on Post {self.post_id}>'
