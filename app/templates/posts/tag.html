@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Tag: #{{ tag.name }} - Blogging Platform{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="flex items-center space-x-2 text-xs text-slate-400 mb-1">
+            <a href="{{ url_for('posts.list_posts') }}" class="hover:text-slate-600">Posts</a>
+            <span>/</span>
+            <span>Tag</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">#{{ tag.name }}</h1>
+        <p class="text-xs text-slate-400 mt-2">{{ posts|length }} articles tagged with #{{ tag.name }}</p>
+    </div>
+
+    <!-- Posts Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% if posts %}
+            {% for post in posts %}
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="text-xs text-slate-400 mb-2">{{ post.created_at.strftime('%b %d, %Y') if post.created_at else '' }}</div>
+                        <h2 class="text-lg font-bold text-slate-900 mb-2">
+                            <a href="{{ url_for('posts.post_detail', post_id=post.id) }}" class="hover:text-indigo-600">
+                                {{ post.title }}
+                            </a>
+                        </h2>
+                        <div class="text-xs text-slate-600 line-clamp-3 mb-4">
+                            {{ post.content|striptags|truncate(140) }}
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <span class="text-slate-500">By {{ post.author.username if post.author else 'Author' }}</span>
+                        <a href="{{ url_for('posts.post_detail', post_id=post.id) }}" class="font-bold text-indigo-600 hover:text-indigo-700">Read →</a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-xs text-slate-500 italic p-6">No posts tagged with #{{ tag.name }} yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

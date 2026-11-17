@@ -15,11 +15,16 @@
             <a href="{{ url_for('main.index') }}" class="font-bold text-xl tracking-wide flex items-center space-x-2">
                 <span>✍️ Flask Blog</span>
             </a>
-            <div class="flex items-center space-x-6 text-sm font-medium">
+            <div class="flex items-center space-x-5 text-sm font-medium">
                 <a href="{{ url_for('main.index') }}" class="hover:text-indigo-200 transition">Home</a>
-                <a href="{{ url_for('main.about') }}" class="hover:text-indigo-200 transition">About Architecture</a>
+                <a href="{{ url_for('posts.list_posts') }}" class="hover:text-indigo-200 transition">Articles</a>
+                <a href="{{ url_for('posts.manage_categories') }}" class="hover:text-indigo-200 transition">Categories</a>
+                <a href="{{ url_for('main.about') }}" class="hover:text-indigo-200 transition">Architecture</a>
                 
                 {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('posts.create_post') }}" class="bg-indigo-500 hover:bg-indigo-400 px-3 py-1.5 rounded-lg transition text-xs font-semibold">
+                        + New Post
+                    </a>
                     <a href="{{ url_for('auth.profile') }}" class="hover:text-indigo-200 transition flex items-center space-x-1">
                         <span>👤 {{ current_user.username }}</span>
                     </a>
@@ -63,7 +68,7 @@
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-4 mt-8">
         <div class="max-w-6xl mx-auto px-4 text-center text-xs text-slate-500">
-            Blogging Platform with Flask • Week 2: User Authentication & Session Management (Flask-Login)
+            Blogging Platform with Flask • Week 3: Blog Post CRUD Functionality, Categories, Tags & Rich Text Editor
         </div>
     </footer>
 

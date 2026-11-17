@@ -25,9 +25,11 @@ def create_app(config_name=None):
     from app.main import main_bp
     from app.api import api_bp
     from app.auth import auth_bp
+    from app.posts import posts_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(posts_bp)
 
     return app

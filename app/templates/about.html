@@ -4,43 +4,49 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-slate-200 p-8 space-y-6">
-    <h1 class="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-3">Project Architecture & Authentication Design</h1>
+    <h1 class="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-3">Project Architecture & System Design</h1>
     
     <div>
-        <h2 class="text-base font-semibold text-slate-800 mb-2">1. Application Factory & Modular Blueprints</h2>
+        <h2 class="text-base font-semibold text-slate-800 mb-2">1. Modular Blueprints & Application Factory</h2>
         <p class="text-sm text-slate-600 leading-relaxed">
-            The project employs Flask's Application Factory pattern (<code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">create_app()</code>) with distinct Blueprints:
+            Built using Flask's Application Factory pattern (<code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">create_app()</code>) with distinct Blueprints:
         </p>
         <ul class="list-disc list-inside text-sm text-slate-600 mt-2 space-y-1">
-            <li><strong class="font-mono text-xs text-indigo-600">auth_bp</strong> (<code class="font-mono text-xs">/auth/register</code>, <code class="font-mono text-xs">/auth/login</code>, <code class="font-mono text-xs">/auth/logout</code>, <code class="font-mono text-xs">/auth/profile</code>): User authentication and session lifecycle.</li>
-            <li><strong class="font-mono text-xs text-indigo-600">main_bp</strong> (<code class="font-mono text-xs">/</code>, <code class="font-mono text-xs">/about</code>, <code class="font-mono text-xs">/health</code>, <code class="font-mono text-xs">/create-post</code>): Core web views and post publishing.</li>
-            <li><strong class="font-mono text-xs text-indigo-600">api_bp</strong> (<code class="font-mono text-xs">/api/users</code>, <code class="font-mono text-xs">/api/posts</code>): RESTful JSON API endpoints.</li>
+            <li><strong class="font-mono text-xs text-indigo-600">posts_bp</strong> (<code class="font-mono text-xs">/posts</code>): Full CRUD lifecycle for posts, categories, tags, and rich text authoring.</li>
+            <li><strong class="font-mono text-xs text-indigo-600">auth_bp</strong> (<code class="font-mono text-xs">/auth</code>): Registration, authentication, logout, and protected profiles.</li>
+            <li><strong class="font-mono text-xs text-indigo-600">main_bp</strong> (<code class="font-mono text-xs">/</code>): Home dashboard and health metrics.</li>
+            <li><strong class="font-mono text-xs text-indigo-600">api_bp</strong> (<code class="font-mono text-xs">/api</code>): RESTful JSON endpoints.</li>
         </ul>
     </div>
 
     <div>
-        <h2 class="text-base font-semibold text-slate-800 mb-2">2. Flask-Login & Session Management</h2>
-        <p class="text-sm text-slate-600 leading-relaxed">
-            User sessions are managed using <strong>Flask-Login</strong>:
-        </p>
+        <h2 class="text-base font-semibold text-slate-800 mb-2">2. Database Models & Relational Architecture</h2>
         <ul class="list-disc list-inside text-sm text-slate-600 mt-2 space-y-1">
-            <li><code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">UserMixin</code>: Implements standard Flask-Login properties (<code class="font-mono text-xs">is_authenticated</code>, <code class="font-mono text-xs">is_active</code>, <code class="font-mono text-xs">is_anonymous</code>, <code class="font-mono text-xs">get_id()</code>).</li>
-            <li><code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">@login_manager.user_loader</code>: Dynamically loads the active user from the session database ID.</li>
-            <li><code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">@login_required</code>: Protects sensitive views, automatically redirecting unauthorized visitors to <code class="font-mono text-xs">/auth/login?next=...</code> with flash alerts.</li>
+            <li><strong class="font-semibold text-slate-800">User</strong>: Auth credentials, session state (<code class="font-mono text-xs">UserMixin</code>), and password hash.</li>
+            <li><strong class="font-semibold text-slate-800">Post</strong>: Core entity containing title, slug, HTML content, timestamp, author foreign key, and category foreign key.</li>
+            <li><strong class="font-semibold text-slate-800">Category</strong>: One-to-Many relationship with Post (<code class="font-mono text-xs">category.posts</code>).</li>
+            <li><strong class="font-semibold text-slate-800">Tag & post_tags</strong>: Many-to-Many association table linking posts with reusable tags (<code class="font-mono text-xs">post.tags</code>).</li>
         </ul>
     </div>
 
     <div>
-        <h2 class="text-base font-semibold text-slate-800 mb-2">3. Password Security & Hashing</h2>
+        <h2 class="text-base font-semibold text-slate-800 mb-2">3. Flask-WTF Forms & Validation</h2>
         <p class="text-sm text-slate-600 leading-relaxed">
-            Passwords are never stored in plaintext. Passwords undergo cryptographic salted one-way hashing using Werkzeug's security suite (<code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">generate_password_hash</code> and <code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">check_password_hash</code>).
+            Form handling is implemented with <strong>Flask-WTF</strong> and <strong>WTForms</strong>, featuring CSRF tokens, length and data required validators, dynamic category selection, and comma-separated tag parsing.
         </p>
     </div>
 
     <div>
-        <h2 class="text-base font-semibold text-slate-800 mb-2">4. Database Migrations (Flask-Migrate)</h2>
+        <h2 class="text-base font-semibold text-slate-800 mb-2">4. Rich Text Editor (Quill.js)</h2>
         <p class="text-sm text-slate-600 leading-relaxed">
-            All schema updates are tracked through versioned Alembic scripts in <code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">migrations/</code>, ensuring zero-loss schema upgrades.
+            The post creation and editing interface integrates the <strong>Quill.js</strong> rich text editor, enabling writers to format headers, bold/italic text, lists, blockquotes, and code blocks. Contents sync automatically into Flask-WTF fields before submission.
+        </p>
+    </div>
+
+    <div>
+        <h2 class="text-base font-semibold text-slate-800 mb-2">5. Database Migrations (Flask-Migrate)</h2>
+        <p class="text-sm text-slate-600 leading-relaxed">
+            Schema changes are tracked version by version in <code class="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">migrations/versions/</code> using Alembic, supporting database upgrades and rollbacks.
         </p>
     </div>
 </div>

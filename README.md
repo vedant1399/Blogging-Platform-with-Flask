@@ -1,34 +1,38 @@
-# Blogging Platform with Flask (Week 2: User Authentication)
+# Blogging Platform with Flask (Week 3: Blog Post CRUD Functionality)
 
-A modular, production-ready Flask application serving as the foundation for the **Blogging Platform with Flask** internship project. 
+A modular, production-ready web application built with Flask for the **Blogging Platform with Flask** internship.
 
-Building upon Week 1's architecture (Application Factory, Blueprints, SQLAlchemy, Flask-Migrate), **Week 2** adds full **User Authentication & Session Management** using **Flask-Login** and **Werkzeug Security**.
+Building upon Week 1 (Application Factory, Blueprints, SQLAlchemy, Flask-Migrate) and Week 2 (User Authentication & Flask-Login), **Week 3** delivers complete **Blog Post CRUD Functionality**, **Category and Tag relational models**, **Flask-WTF form validation**, and an integrated **Rich Text Editor**.
 
 ---
 
 ## 🌟 Key Features
 
+### Week 3: Blog Post CRUD, Categories, Tags & Rich Text
+- **Complete CRUD Operations**:
+  - **Create**: Compose and publish posts via `/posts/new` (guarded by `@login_required`).
+  - **Read**: Browse all posts at `/posts/`, filter by category at `/posts/category/<slug>`, filter by tag at `/posts/tag/<slug>`, or view detailed articles at `/posts/<id>`.
+  - **Update**: Edit existing articles at `/posts/<id>/edit` (author-only authorization).
+  - **Delete**: Remove articles safely via CSRF-protected form at `/posts/<id>/delete` (author-only authorization).
+- **Relational Models & Taxonomy**:
+  - `Category`: One-to-Many relationship with `Post`.
+  - `Tag` & `post_tags`: Many-to-Many association table allowing multi-tagging per article.
+- **Flask-WTF Forms**:
+  - Form validation with CSRF protection (`PostForm`, `CategoryForm`, `DeleteForm`).
+  - Dynamic category dropdown selector and comma-separated tag parsing.
+- **Rich Text Editor (Quill.js)**:
+  - Integrated rich text editor supporting headings, bold/italic, lists, blockquotes, and code blocks.
+  - Automatic synchronization with the underlying Flask-WTF textarea on submission.
+
 ### Week 2: User Authentication & Sessions
-- **User Registration**: `/auth/register` with validation (duplicate checks, minimum password length, password confirmation).
-- **Secure Password Hashing**: Cryptographic one-way hashing with salt using Werkzeug (`generate_password_hash` & `check_password_hash`).
-- **Session Management with Flask-Login**:
-  - `UserMixin` model integration.
-  - `@login_manager.user_loader` session loader.
-  - Remember-me cookie support.
-  - Safe post-login redirection using `next` query parameter.
-- **Access Control & Protected Routes**: Guarded with `@login_required` (e.g. creating posts, accessing `/auth/profile`, logging out).
-- **Responsive Dynamic UI**: Navigation bar and actions adapt dynamically based on `current_user.is_authenticated`.
+- **Flask-Login** session management with `UserMixin` and `@login_manager.user_loader`.
+- User registration and login with salted one-way password hashing via Werkzeug security.
+- Route protection with `@login_required` and dynamic session-aware UI.
 
 ### Week 1: Core Architecture
-- **Application Factory Pattern**: Implemented in `app/__init__.py` using `create_app()` with multi-environment support (`development`, `testing`, `production`).
-- **Modular Blueprints**:
-  - `auth_bp`: User authentication & session routes.
-  - `main_bp`: Frontend web routes (`/`, `/about`, `/health`, `/create-post`).
-  - `api_bp`: RESTful JSON API endpoints (`/api/users`, `/api/posts`).
-- **Database Architecture (SQLAlchemy & Flask-Migrate)**:
-  - Models: `User` and `Post` with one-to-many relationship, foreign keys, timestamps, indexes, and JSON serialization.
-  - Alembic migrations in `migrations/` directory to manage and track schema evolution safely.
-- **Automated Testing Suite**: Comprehensive unit tests covering authentication, registration, login/logout, factory instantiation, blueprints, models, and API endpoints (**13/13 tests passing**).
+- **Application Factory Pattern** (`create_app()`) supporting multiple environments (`config.py`).
+- **Modular Blueprints**: `main_bp`, `auth_bp`, `posts_bp`, and `api_bp`.
+- **Database Migrations**: Alembic version control tracked through Flask-Migrate (`migrations/`).
 
 ---
 
@@ -37,38 +41,39 @@ Building upon Week 1's architecture (Application Factory, Blueprints, SQLAlchemy
 ```text
 Blogging-Platform-with-Flask/
 ├── app/
-│   ├── __init__.py          # create_app() factory, registers main, auth, and api blueprints
-│   ├── extensions.py        # SQLAlchemy, Flask-Migrate, and Flask-Login instances
-│   ├── models.py            # User (UserMixin) and Post SQLAlchemy models with hashing
+│   ├── __init__.py          # create_app() factory, registers all blueprints
+│   ├── extensions.py        # SQLAlchemy, Flask-Migrate, Flask-Login
+│   ├── models.py            # User, Post, Category, Tag models & post_tags association
+│   ├── forms.py             # Flask-WTF forms (PostForm, CategoryForm, DeleteForm)
+│   ├── posts/               # Posts & Categories Blueprint (CRUD)
+│   │   ├── __init__.py
+│   │   └── routes.py        # List, create, read, edit, delete, category & tag views
 │   ├── auth/                # Auth Blueprint (Flask-Login)
 │   │   ├── __init__.py
-│   │   └── routes.py        # /auth/register, /auth/login, /auth/logout, /auth/profile
-│   ├── main/                # Main frontend Blueprint
+│   │   └── routes.py        # Register, login, logout, profile
+│   ├── main/                # Main Blueprint (presentation & health)
 │   │   ├── __init__.py
-│   │   └── routes.py        # Home (/), About (/about), Health (/health), /create-post
-│   ├── api/                 # RESTful API Blueprint
-│   │   ├── __init__.py
-│   │   └── routes.py        # Users and Posts JSON endpoints
+│   │   └── routes.py
+│   ├── api/                 # RESTful JSON API Blueprint
 │   ├── templates/           # Jinja2 templates
-│   │   ├── base.html        # Base layout with responsive navbar and flash message banners
-│   │   ├── index.html       # Blog dashboard with dynamic auth state & post creation
-│   │   ├── about.html       # Architecture overview page
-│   │   └── auth/
-│   │       ├── login.html   # Login form with remember me
-│   │       ├── register.html# Registration form
-│   │       └── profile.html # User profile showing authored posts
-│   └── static/              # Static assets (CSS/JS)
-├── migrations/              # Flask-Migrate (Alembic) version control scripts
-├── tests/                   # Automated unit test suite
+│   │   ├── base.html        # Navbar, flash messages, footer
+│   │   ├── index.html       # Home dashboard
+│   │   ├── about.html       # System architecture documentation
+│   │   ├── auth/            # login.html, register.html, profile.html
+│   │   └── posts/           # create.html (Quill.js), detail.html, list.html, category.html, tag.html, categories.html
+│   └── static/              # CSS & JS assets
+├── migrations/              # Alembic database migration scripts
+├── tests/                   # Automated unit test suite (20 tests)
 │   ├── __init__.py
-│   ├── test_basics.py       # Factory, blueprint, model, and API tests
-│   └── test_auth.py         # Authentication, registration, login, logout & session tests
+│   ├── test_basics.py       # Factory & baseline tests
+│   ├── test_auth.py         # Registration & login tests
+│   └── test_posts.py        # Post CRUD, authorization & taxonomy tests
 ├── instance/                # SQLite database storage (gitignored)
 ├── config.py                # Environment configuration classes
 ├── run.py                   # Application entrypoint & CLI shell context
 ├── requirements.txt         # Pinned project dependencies
 ├── .env.example             # Template for environment variables
-├── .gitignore               # Git ignore rules for Python and databases
+├── .gitignore               # Git ignore rules
 └── README.md                # Comprehensive documentation
 ```
 
@@ -80,78 +85,64 @@ Blogging-Platform-with-Flask/
 - Python 3.10+ installed
 - Git installed
 
-### 2. Clone the Repository
+### 2. Clone & Setup
 ```bash
 git clone https://github.com/vedant1399/Blogging-Platform-with-Flask.git
 cd Blogging-Platform-with-Flask
-```
 
-### 3. Create & Activate Virtual Environment
-```bash
-# Windows
+# Create & activate virtual environment
 python -m venv venv
-.\venv\Scripts\activate
+.\venv\Scripts\activate   # On Windows
+source venv/bin/activate  # On macOS/Linux
 
-# macOS / Linux
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### 4. Install Dependencies
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### 5. Configure Environment Variables
-Copy `.env.example` to `.env`:
-```bash
-# Windows
-copy .env.example .env
+# Configure environment variables
+copy .env.example .env    # On Windows
+cp .env.example .env      # On macOS/Linux
 
-# macOS / Linux
-cp .env.example .env
-```
-
-### 6. Apply Database Migrations
-Run the Flask database migration command to set up the SQLite database:
-```bash
+# Run database migrations
 flask db upgrade
-```
 
-### 7. Run the Application
-```bash
+# Start development server
 python run.py
 ```
-Open your browser and navigate to: **`http://127.0.0.1:5000`**
+Open **`http://127.0.0.1:5000`** in your browser.
 
 ---
 
 ## 🧪 Running Automated Tests
 
-Run the full test suite to verify application & authentication integrity:
+Run the full automated test suite:
 ```bash
 python -m unittest discover tests
 ```
+**Status: 20/20 unit tests passing.**
 
 ---
 
-## 📡 Key Routes
+## 📡 Routes & Endpoints
 
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
-| `GET` | `/` | Public | Home page blog dashboard |
-| `GET, POST` | `/auth/register` | Public | User registration with password hashing |
-| `GET, POST` | `/auth/login` | Public | User login with session management |
-| `GET` | `/auth/logout` | Logged In | User logout & session termination |
-| `GET` | `/auth/profile` | Logged In | Authenticated user profile |
-| `POST` | `/create-post` | Logged In | Publish a new blog post |
-| `GET` | `/api/posts` | Public | Retrieve list of all blog posts (JSON) |
-| `GET` | `/api/users` | Public | Retrieve list of all users/authors (JSON) |
+| `GET` | `/` | Public | Home page dashboard |
+| `GET` | `/posts/` | Public | Explore all blog articles |
+| `GET, POST` | `/posts/new` | Logged In | Create post (Flask-WTF + Quill.js editor) |
+| `GET` | `/posts/<id>` | Public | View article detail with category & tags |
+| `GET, POST` | `/posts/<id>/edit` | Author Only | Edit article (pre-populated form) |
+| `POST` | `/posts/<id>/delete` | Author Only | Delete article (CSRF protected) |
+| `GET` | `/posts/category/<slug>` | Public | Filter posts by category |
+| `GET` | `/posts/tag/<slug>` | Public | Filter posts by tag |
+| `GET, POST` | `/posts/categories` | Logged In | Manage and create categories |
+| `GET, POST` | `/auth/register` | Public | User registration |
+| `GET, POST` | `/auth/login` | Public | User login & session management |
+| `GET` | `/auth/logout` | Logged In | Terminate user session |
 
 ---
 
 ## 📚 References
+- [Flask-WTF Documentation](https://flask-wtf.readthedocs.io/en/1.2.x/)
 - [Flask-Login Documentation](https://flask-login.readthedocs.io/en/latest/)
-- [Flask Official Tutorial](https://flask.palletsprojects.com/en/2.3.x/tutorial/)
 - [Flask-SQLAlchemy Documentation](https://flask-sqlalchemy.palletsprojects.com/)
 - [Flask-Migrate Documentation](https://flask-migrate.readthedocs.io/)
