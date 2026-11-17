@@ -1,46 +1,97 @@
 {% extends 'base.html' %}
+{% from '_macros.html' import render_pagination %}
 
-{% block title %}Profile - {{ user.username }}{% endblock %}
+{% block title %}Dashboard - {{ user.username }}{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto space-y-6">
+    <!-- Breadcrumbs -->
+    <nav class="flex text-xs text-slate-500 space-x-2 items-center" aria-label="Breadcrumb">
+        <a href="{{ url_for('main.index') }}" class="hover:text-indigo-600">Home</a>
+        <span>/</span>
+        <span class="text-slate-800 font-semibold">Dashboard</span>
+    </nav>
+
     <!-- User Profile Header -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center justify-between">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex items-center space-x-4">
-            <div class="w-16 h-16 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-2xl">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-2xl shadow-sm">
                 {{ user.username[0]|upper }}
             </div>
             <div>
                 <h1 class="text-2xl font-bold text-slate-900">{{ user.username }}</h1>
                 <p class="text-xs text-slate-500">{{ user.email }} • Member since {{ user.created_at.strftime('%B %Y') if user.created_at else 'Recent' }}</p>
+                <div class="flex items-center space-x-2 mt-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                        ● Authenticated Session
+                    </span>
+                    <a href="{{ url_for('main.user_profile', username=user.username) }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 underline">
+                        View Public Profile
+                    </a>
+                </div>
             </div>
         </div>
-        <div class="text-right">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-                ● Authenticated Session
-            </span>
-            <div class="text-xs text-slate-400 mt-1">Flask-Login Active</div>
+
+        <div class="flex gap-2">
+            <a href="{{ url_for('posts.create_post') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow-sm">
+                ✏️ Write Post
+            </a>
+            <a href="{{ url_for('auth.logout') }}" class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold px-4 py-2.5 rounded-lg transition">
+                Logout
+            </a>
         </div>
     </div>
 
     <!-- User's Authored Posts -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h2 class="text-lg font-bold text-slate-900 mb-4">Your Published Posts ({{ posts|length }})</h2>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-lg font-bold text-slate-900">Your Published Articles ({{ pagination.total }})</h2>
+            <a href="{{ url_for('posts.create_post') }}" class="text-xs font-semibold text-indigo-600 hover:underline">
+                + Create New Article
+            </a>
+        </div>
+
         <div class="space-y-4">
             {% if posts %}
                 {% for post in posts %}
-                    <div class="border border-slate-100 bg-slate-50/50 p-4 rounded-lg">
-                        <h3 class="font-bold text-slate-800 text-base">{{ post.title }}</h3>
-                        <p class="text-sm text-slate-600 mt-1">{{ post.content }}</p>
-                        <div class="text-[10px] text-slate-400 mt-2">
-                            Published: {{ post.created_at.strftime('%Y-%m-%d %H:%M UTC') if post.created_at else '' }}
+                    <div class="border border-slate-100 bg-slate-50/50 p-5 rounded-xl hover:border-indigo-100 transition flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2 text-xs">
+                                {% if post.category %}
+                                    <span class="font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                                        {{ post.category.name }}
+                                    </span>
+                                {% endif %}
+                                <span class="text-slate-400">{{ post.created_at.strftime('%b %d, %Y') if post.created_at else '' }}</span>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-base hover:text-indigo-600">
+                                <a href="{{ url_for('posts.post_detail', post_id=post.id) }}">{{ post.title }}</a>
+                            </h3>
+                            <p class="text-xs text-slate-500 line-clamp-1">{{ post.content|striptags }}</p>
+                        </div>
+
+                        <div class="flex items-center space-x-2 shrink-0">
+                            <a href="{{ url_for('posts.post_detail', post_id=post.id) }}" class="text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition">
+                                View
+                            </a>
+                            <a href="{{ url_for('posts.edit_post', post_id=post.id) }}" class="text-xs font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg transition">
+                                Edit
+                            </a>
                         </div>
                     </div>
                 {% endfor %}
             {% else %}
-                <p class="text-xs text-slate-400 italic">You haven't published any posts yet. Head over to the home page to publish one!</p>
+                <div class="text-center py-8">
+                    <p class="text-xs text-slate-400 italic">You haven't published any articles yet.</p>
+                    <a href="{{ url_for('posts.create_post') }}" class="inline-block mt-3 bg-indigo-600 text-white text-xs font-semibold px-4 py-2 rounded-lg">
+                        Write your first article
+                    </a>
+                </div>
             {% endif %}
         </div>
+
+        <!-- Pagination -->
+        {{ render_pagination(pagination, 'auth.profile') }}
     </div>
 </div>
 {% endblock %}

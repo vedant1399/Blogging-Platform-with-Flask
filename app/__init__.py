@@ -1,4 +1,5 @@
 import os
+import re
 from flask import Flask
 from config import config
 from app.extensions import db, migrate, login_manager
@@ -20,6 +21,21 @@ def create_app(config_name=None):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+
+    # Custom Jinja2 Filters for Frontend Templates
+    @app.template_filter('reading_time')
+    def reading_time_filter(html_text):
+        """Calculate estimated reading time from HTML text."""
+        words = len(re.findall(r'\w+', re.sub(r'<[^>]+>', '', html_text or '')))
+        minutes = max(1, round(words / 200))
+        return f"{minutes} min read"
+
+    @app.template_filter('format_datetime')
+    def format_datetime_filter(dt, format='%B %d, %Y'):
+        """Format datetime object into human-readable string."""
+        if dt is None:
+            return ''
+        return dt.strftime(format)
 
     # Register Blueprints
     from app.main import main_bp

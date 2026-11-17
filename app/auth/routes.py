@@ -105,6 +105,11 @@ def logout():
 @auth_bp.route('/profile')
 @login_required
 def profile():
-    """Protected user profile route."""
-    user_posts = Post.query.filter_by(user_id=current_user.id).order_by(Post.created_at.desc()).all()
-    return render_template('auth/profile.html', user=current_user, posts=user_posts)
+    """Protected user dashboard route with paginated posts."""
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+    pagination = Post.query.filter_by(user_id=current_user.id).order_by(Post.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    posts = pagination.items
+    return render_template('auth/profile.html', user=current_user, pagination=pagination, posts=posts)

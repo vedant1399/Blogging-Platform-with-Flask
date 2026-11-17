@@ -14,11 +14,16 @@ def get_category_choices():
 
 @posts_bp.route('/')
 def list_posts():
-    """List all blog posts with category and tag info."""
-    posts = Post.query.order_by(Post.created_at.desc()).all()
+    """List all blog posts with paginated navigation, category and tag filters."""
+    page = request.args.get('page', 1, type=int)
+    per_page = 6
+    pagination = Post.query.order_by(Post.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    posts = pagination.items
     categories = Category.query.order_by(Category.name).all()
     tags = Tag.query.order_by(Tag.name).all()
-    return render_template('posts/list.html', posts=posts, categories=categories, tags=tags)
+    return render_template('posts/list.html', pagination=pagination, posts=posts, categories=categories, tags=tags)
 
 
 @posts_bp.route('/new', methods=['GET', 'POST'])
@@ -50,12 +55,14 @@ def create_post():
 
 @posts_bp.route('/<int:post_id>')
 def post_detail(post_id):
-    """View a single blog post in detail."""
+    """View a single blog post in detail with breadcrumbs & prev/next navigation."""
     post = db.session.get(Post, post_id)
     if not post:
         abort(404)
     delete_form = DeleteForm()
-    return render_template('posts/detail.html', post=post, delete_form=delete_form)
+    prev_post = Post.query.filter(Post.id < post.id).order_by(Post.id.desc()).first()
+    next_post = Post.query.filter(Post.id > post.id).order_by(Post.id.asc()).first()
+    return render_template('posts/detail.html', post=post, delete_form=delete_form, prev_post=prev_post, next_post=next_post)
 
 
 @posts_bp.route('/<int:post_id>/edit', methods=['GET', 'POST'])
@@ -115,18 +122,28 @@ def delete_post(post_id):
 
 @posts_bp.route('/category/<slug>')
 def category_posts(slug):
-    """Filter posts by category."""
+    """Filter posts by category with pagination."""
     category = Category.query.filter_by(slug=slug).first_or_404()
-    posts = category.posts.order_by(Post.created_at.desc()).all()
-    return render_template('posts/category.html', category=category, posts=posts)
+    page = request.args.get('page', 1, type=int)
+    per_page = 6
+    pagination = category.posts.order_by(Post.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    posts = pagination.items
+    return render_template('posts/category.html', category=category, pagination=pagination, posts=posts)
 
 
 @posts_bp.route('/tag/<slug>')
 def tag_posts(slug):
-    """Filter posts by tag."""
+    """Filter posts by tag with pagination."""
     tag = Tag.query.filter_by(slug=slug).first_or_404()
-    posts = tag.posts.order_by(Post.created_at.desc()).all()
-    return render_template('posts/tag.html', tag=tag, posts=posts)
+    page = request.args.get('page', 1, type=int)
+    per_page = 6
+    pagination = tag.posts.order_by(Post.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    posts = pagination.items
+    return render_template('posts/tag.html', tag=tag, pagination=pagination, posts=posts)
 
 
 @posts_bp.route('/categories', methods=['GET', 'POST'])

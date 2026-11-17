@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import render_pagination, render_post_card %}
+
+{% block title %}Author: {{ user.username }} - Flask Blog{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-8">
+    <!-- Breadcrumb Navigation -->
+    <nav class="flex text-xs text-slate-500 space-x-2 items-center" aria-label="Breadcrumb">
+        <a href="{{ url_for('main.index') }}" class="hover:text-indigo-600">Home</a>
+        <span>/</span>
+        <span class="text-slate-400">Authors</span>
+        <span>/</span>
+        <span class="text-slate-800 font-semibold">{{ user.username }}</span>
+    </nav>
+
+    <!-- Author Profile Header Banner -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div class="flex items-center space-x-5">
+            <div class="w-20 h-20 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-3xl shadow-sm">
+                {{ user.username[0]|upper }}
+            </div>
+            <div>
+                <div class="flex items-center space-x-2">
+                    <h1 class="text-2xl font-extrabold text-slate-900">{{ user.username }}</h1>
+                    <span class="bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        Author
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">{{ user.email }}</p>
+                <div class="flex items-center space-x-4 mt-3 text-xs text-slate-400">
+                    <span>📅 Joined {{ user.created_at.strftime('%B %Y') if user.created_at else 'Recently' }}</span>
+                    <span>•</span>
+                    <span class="font-semibold text-slate-700">{{ pagination.total }} published articles</span>
+                </div>
+            </div>
+        </div>
+
+        {% if current_user.is_authenticated and current_user.id == user.id %}
+            <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <a href="{{ url_for('posts.create_post') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg text-center transition shadow-sm">
+                    ✏️ New Post
+                </a>
+                <a href="{{ url_for('auth.profile') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2.5 rounded-lg text-center transition">
+                    Account Dashboard
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Author's Articles Section -->
+    <div class="space-y-6">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+            <h2 class="text-xl font-bold text-slate-900">Articles by {{ user.username }}</h2>
+            <span class="text-xs text-slate-500 font-medium">{{ pagination.total }} total</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% if posts %}
+                {% for post in posts %}
+                    {{ render_post_card(post, current_user) }}
+                {% endfor %}
+            {% else %}
+                <div class="md:col-span-2 bg-white p-12 rounded-2xl border border-slate-200 text-center">
+                    <p class="text-slate-500 text-sm italic">{{ user.username }} has not published any articles yet.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Pagination Controls -->
+        {{ render_pagination(pagination, 'main.user_profile', username=user.username) }}
+    </div>
+</div>
+{% endblock %}
